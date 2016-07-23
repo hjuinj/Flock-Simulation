@@ -98,13 +98,20 @@ class World(object):
 
         return self.points + self.lines
 
-    def playAnimation(self, members, func, *args, **kwargs ):
-        self.points, self.lines = self.animate3D_setup(members)
+    def playAnimation(self, flock, func, *args, **kwargs ):
+        self.points, self.lines = self.animate3D_setup(flock)
         frames = 20
         if "frames" in kwargs:
             frames = kwargs["frames"]
         anim = animation.FuncAnimation(self.fig, func, frames = frames, fargs = (args, ), blit = True)
         plt.show()
 
+    def saveAnimation(self, flock, func, *args, **kwargs):
+        self.points, self.lines = self.animate3D_setup(flock)
+        frames = 20
+        if "frames" in kwargs:
+            frames = kwargs["frames"]
+        anim = animation.FuncAnimation(self.fig, func, frames = frames, fargs = (args, ), blit = True)
+        anim.save('./tmp.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
     #def genRandLine(self):
     #def test(self):
