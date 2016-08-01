@@ -5,6 +5,7 @@
         - move random move to flock.py
         - modify resolution to account for non-cubic box
         - line trace should fade after certain iteration
+        - animate3D update coord to self.flock
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,7 +14,7 @@ import matplotlib.animation as animation
 
 
 class World(object):
-    def __init__(self, resolution = 64,  dim = [[-1, 1], [-1, 1], [-1, 1]], trace_lim = 7):
+    def __init__(self, resolution = 256,  dim = [[-1, 1], [-1, 1], [-1, 1]], trace_lim = 7):
         self.dim, self.resolution = dim, resolution
         # the trace for the trajectory shouldn't be too large to avoid storing too much data
         self.trace_lim = trace_lim
@@ -66,33 +67,37 @@ class World(object):
 
     def animate3D_setup(self, flock):
         self.members = flock.members
+        self.flock = flock
         ax = self.worldSetup()
         self.traj = [[[0 for i in range(self.trace_lim)] for j in range(len(self.dim))] for k in range(self.members)] # keep track of line trajectory
-        points  =  [ax.plot([], [], [],flock.shapes[i], c = flock.colors[i], ms = flock.sizes[i])[0] for i in range(self.members)]
-        lines = [ax.plot([], [], [],  ls = flock.traceStyle[i], lw = flock.traceSize[i], c = flock.colors[i])[0] for i in range(self.members)]
+        points  =  [ax.plot([], [], [], self.flock.shapes[i], c = self.flock.colors[i], ms = self.flock.sizes[i], markeredgecolor = 'none')[0] for i in range(self.members)]
+        lines = [ax.plot([], [], [],  ls = self.flock.traceStyle[i], lw = self.flock.traceSize[i], c = self.flock.colors[i], markeredgecolor = 'none')[0] for i in range(self.members)]
         return points, lines
 
     def animate3D(self, frame,  fields ):
         if fields[1 : ] == () :
-            coord = fields[0]()
+            self.flock.positions = fields[0]()
         else:
-            coord = fields[0](fields[1 : ])
+            self.flock.positions = fields[0](fields[1 : ])
         for i in range(self.members):
-            self.points[i].set_data(coord[i][0], coord[i][1])
-            self.points[i].set_3d_properties( coord[i][2])
+            self.points[i].set_color(self.flock.colors[i])
+            self.points[i].set_data(self.flock.positions[i][0], self.flock.positions[i][1])
+            self.points[i].set_3d_properties( self.flock.positions[i][2])
         return self.points
 
     def animate3D_trace(self, frame, fields):
         if fields[1 : ] == () :
-            coord = fields[0]()
+            self.flock.positions = fields[0]()
         else:
-            coord = fields[0](fields[1 : ])
+            self.flock.positions = fields[0](fields[1 : ])
         for i in range(self.members):
-            self.points[i].set_data(coord[i][0], coord[i][1])
-            self.points[i].set_3d_properties( coord[i][2])
+            self.points[i].set_color(self.flock.colors[i])
+            self.points[i].set_data(self.flock.positions[i][0], self.flock.positions[i][1])
+            self.points[i].set_3d_properties( self.flock.positions[i][2])
+
             for j in range(len(self.dim)):
                 self.traj[i][j].pop(0)
-                self.traj[i][j].append(coord[i][j])
+                self.traj[i][j].append(self.flock.positions[i][j])
             self.lines[i].set_data(self.traj[i][0][-self.trace_lim : ], self.traj[i][1][-self.trace_lim : ])
             self.lines[i].set_3d_properties( self.traj[i][2][-self.trace_lim : ])
 
@@ -112,6 +117,19 @@ class World(object):
         if "frames" in kwargs:
             frames = kwargs["frames"]
         anim = animation.FuncAnimation(self.fig, func, frames = frames, fargs = (args, ), blit = True)
-        anim.save('./tmp.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+        anim.save('./tmp.mp4', fps=20, extra_args=['-vcodec', 'libx264'])
+
+    def plotAvgDist(self, flock, func, iter = 1000):
+        x = []
+        y = []
+        for i in xrange(iter):
+            x.append(i)
+            y.append(np.sum(flock.pairDistance()))
+            flock.positions = func()
+        plt.plot(x,y)
+        plt.show()
+
+
+
     #def genRandLine(self):
     #def test(self):

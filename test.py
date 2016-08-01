@@ -29,5 +29,9 @@ plt.show()
 """
 w = World();
 f = Flock(world = w, members = 200)
+
 #w.playAnimation(f, w.animate3D_trace, f.genRandPositions, frames = 1)
-w.playAnimation(f, w.animate3D_trace, f.uniformVel, frames = 1)
+#w.playAnimation(f, w.animate3D_trace, f.uniformVel, frames = 100)
+#w.playAnimation(f, w.animate3D, f.uniformVel, frames = 100)
+w.plotAvgDist(f, f.uniformVel)
+#w.saveAnimation(f, w.animate3D_trace, f.uniformVel, frames = 1000)
