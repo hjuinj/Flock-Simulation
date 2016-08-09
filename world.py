@@ -6,6 +6,7 @@
         - modify resolution to account for non-cubic box
         - line trace should fade after certain iteration
         - animate3D update coord to self.flock
+        - R function plug-ins for plotting
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -19,7 +20,7 @@ class World(object):
         # the trace for the trajectory shouldn't be too large to avoid storing too much data
         self.trace_lim = trace_lim
 
-
+    def setTraceLim(self, lim): self.trace_lim = lim
     def setDim(self, dim): self.dim = dim
     def getDim(self): return self.dim
 
